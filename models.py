@@ -13,3 +13,5 @@ class Channel:
     tvg_name: str = ""
     tvg_logo: str = ""
     group: str = ""
+
+    lcn: int | None = None

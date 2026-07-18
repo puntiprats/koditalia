@@ -50,7 +50,9 @@ unknown = []
 
 for c in best.values():
 
-    n = channel_number(c.name)
+n = channel_number(c.name)
+
+c.lcn = n
 
     if n is None:
 
@@ -68,7 +70,13 @@ ordered = [c for _, c in known]
 
 ordered.extend(unknown)
 
-save_playlist(ordered, OUTPUT)
+duplicates.sort(key=lambda c: (c.name, -score(c)))
+
+save_playlist(
+    ordered,
+    duplicates,
+    OUTPUT
+)
 
     print("Playlist salvata in", OUTPUT)
 
