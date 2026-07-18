@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+output/*.m3u
+cache/
+cache/*.json
