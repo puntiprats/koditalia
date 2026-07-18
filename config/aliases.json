@@ -1,1 +1,51 @@
-{}
+{
+  "Rai 1": [
+    "Rai Uno",
+    "RAI1",
+    "Rai1",
+    "Rai 1 HD"
+  ],
+
+  "Rai 2": [
+    "Rai2",
+    "RAI2",
+    "Rai Due"
+  ],
+
+  "Rai 3": [
+    "Rai3",
+    "RAI3",
+    "Rai Tre"
+  ],
+
+  "Canale 5": [
+    "Canale5",
+    "Canale 5 HD",
+    "Canale5 HD"
+  ],
+
+  "Italia 1": [
+    "Italia1",
+    "Italia 1 HD"
+  ],
+
+  "Rete 4": [
+    "Rete4",
+    "Rete 4 HD"
+  ],
+
+  "La7": [
+    "LA7",
+    "La7 HD"
+  ],
+
+  "TV8": [
+    "Tv8",
+    "TV8 HD"
+  ],
+
+  "NOVE": [
+    "Nove",
+    "NOVE HD"
+  ]
+}
