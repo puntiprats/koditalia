@@ -6,6 +6,7 @@ from matcher import canonical_name
 from lcn import channel_number
 from quality import score
 from validator import alive
+from identity import channel_key
 
 
 INPUT = None
@@ -49,7 +50,7 @@ duplicates = []
 
 for c in channels:
 
-    key = c.name
+key = channel_key(c)
 
     if key not in best:
 

@@ -23,7 +23,11 @@ SCORES = [
 
 def score(channel):
 
-    text = channel.extinf.lower()
+text = (
+    channel.extinf +
+    " " +
+    channel.name
+).lower()
 
     total = 0
 

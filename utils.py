@@ -4,16 +4,24 @@ import unicodedata
 
 QUALITY_WORDS = [
     "uhd",
+    "ultrahd",
     "4k",
     "2160",
     "fhd",
+    "fullhd",
     "1080",
     "hd",
     "720",
-    "sd",
     "576",
+    "sd",
+    "hevc",
+    "h265",
+    "h264",
+    "mpeg4",
+    "av1",
     "backup",
-    "test"
+    "test",
+    "hq"
 ]
 
 
