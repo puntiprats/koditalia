@@ -7,7 +7,7 @@ from lcn import channel_number
 from quality import score
 
 
-INPUT = "it.m3u"
+INPUT = None
 
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -17,7 +17,13 @@ OUTPUT = OUTPUT_DIR / "tvitalia.m3u"
 
 def main():
 
-    channels = load_playlist(INPUT)
+channels = []
+
+for playlist in fetch():
+
+    channels.extend(
+        load_playlist(playlist)
+    )
 
     for c in channels:
         c.name = canonical_name(c.name)
