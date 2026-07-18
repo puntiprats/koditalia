@@ -1,40 +1,40 @@
 import re
-from priority import priority
+
+from models import Channel
 
 
-SCORES = [
-    ("2160", 250),
-    ("uhd", 240),
-    ("4k", 230),
+RULES = (
+    (r"\b2160\b", 500),
+    (r"\b4k\b", 500),
+    (r"\buhd\b", 500),
 
-    ("1080", 200),
-    ("fhd", 190),
+    (r"\b1080\b", 400),
+    (r"\bfhd\b", 400),
 
-    ("720", 150),
-    ("hd", 140),
+    (r"\b720\b", 300),
+    (r"\bhd\b", 300),
 
-    ("576", 80),
-    ("sd", 70),
-
-    ("backup", -150),
-    ("test", -200)
-]
+    (r"\b576\b", 200),
+    (r"\bsd\b", 100),
+)
 
 
-def score(channel):
+def calculate_quality(channel: Channel) -> int:
 
-text = (
-    channel.extinf +
-    " " +
-    channel.name
-).lower()
+    text = f"{channel.name} {channel.extinf}".lower()
 
-    total = 0
+    score = 0
 
-    for word, value in SCORES:
+    for pattern, value in RULES:
 
-        if re.search(r"\b" + re.escape(word) + r"\b", text):
+        if re.search(pattern, text):
+            score = max(score, value)
 
-            total += value
+    return score
 
-return total + priority(channel)
+
+def apply_quality(channels: list[Channel]) -> None:
+
+    for channel in channels:
+
+        channel.quality_score = calculate_quality(channel)
