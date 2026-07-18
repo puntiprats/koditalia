@@ -21,6 +21,9 @@ class Channel:
 
     # Elaborazione
     source: str = ""
+    source_priority: int = 0
+
     canonical_name: str = ""
     quality_score: int = 0
+
     lcn: int | None = None
