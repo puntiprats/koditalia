@@ -3,40 +3,33 @@ import re
 from models import Channel
 
 
-NAME_RE = re.compile(r",(.*)$")
 ATTR_RE = re.compile(r'([a-zA-Z0-9\-]+)="([^"]*)"')
 
 
-def parse_channel(extinf: str, url: str) -> Channel:
+def parse_extinf(line: str) -> tuple[dict[str, str], str]:
+    """
+    Estrae gli attributi di una riga EXTINF e il nome del canale.
+    """
 
-    attrs = dict(ATTR_RE.findall(extinf))
+    attrs = dict(ATTR_RE.findall(line))
 
-    name = ""
+    if "," in line:
+        name = line.split(",", 1)[1].strip()
+    else:
+        name = ""
 
-    m = NAME_RE.search(extinf)
-
-    if m:
-        name = m.group(1).strip()
-
-    return Channel(
-        extinf=extinf,
-        url=url.strip(),
-        name=name,
-        tvg_id=attrs.get("tvg-id", ""),
-        tvg_name=attrs.get("tvg-name", ""),
-        tvg_logo=attrs.get("tvg-logo", ""),
-        group=attrs.get("group-title", ""),
-	source=source
-    )
+    return attrs, name
 
 
-def load_playlist(filename: str, source: str):
+def load_playlist(filename: str, source: str) -> list[Channel]:
+    """
+    Carica una playlist M3U e restituisce una lista di Channel.
+    """
 
-    channels = []
+    channels: list[Channel] = []
 
     with open(filename, encoding="utf8") as f:
-
-        lines = [x.rstrip() for x in f.readlines()]
+        lines = [line.strip() for line in f]
 
     i = 0
 
@@ -44,23 +37,30 @@ def load_playlist(filename: str, source: str):
 
         line = lines[i]
 
-        if line.startswith("#EXTINF"):
+        if not line.startswith("#EXTINF"):
+            i += 1
+            continue
 
-            if i + 1 < len(lines):
+        if i + 1 >= len(lines):
+            break
 
-channel = parse_channel(
-    line,
-    lines[i + 1]
-)
+        url = lines[i + 1].strip()
 
-channel.source = source
+        attrs, name = parse_extinf(line)
 
-channels.append(channel)
+        channels.append(
+            Channel(
+                name=name,
+                url=url,
+                extinf=line,
+                tvg_id=attrs.get("tvg-id", ""),
+                tvg_name=attrs.get("tvg-name", ""),
+                tvg_logo=attrs.get("tvg-logo", ""),
+                group_title=attrs.get("group-title", ""),
+                source=source
+            )
+        )
 
-                i += 2
-
-                continue
-
-        i += 1
+        i += 2
 
     return channels
