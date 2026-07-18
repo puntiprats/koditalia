@@ -15,3 +15,5 @@ class Channel:
     group: str = ""
 
     lcn: int | None = None
+
+    source: str = ""

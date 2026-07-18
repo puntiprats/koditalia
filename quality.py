@@ -1,4 +1,5 @@
 import re
+from priority import priority
 
 
 SCORES = [
@@ -32,4 +33,4 @@ def score(channel):
 
             total += value
 
-    return total
+return total + priority(channel)

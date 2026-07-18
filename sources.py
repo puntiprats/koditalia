@@ -28,18 +28,23 @@ def download(name: str, url: str):
 
 def fetch():
 
-    files = []
+    playlists = []
 
     for source in load_sources():
 
         if not source["enabled"]:
             continue
 
-        files.append(
-            download(
-                source["name"],
-                source["url"]
+        filename = download(
+            source["name"],
+            source["url"]
+        )
+
+        playlists.append(
+            (
+                source,
+                filename
             )
         )
 
-    return files
+    return playlists

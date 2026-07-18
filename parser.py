@@ -25,11 +25,12 @@ def parse_channel(extinf: str, url: str) -> Channel:
         tvg_id=attrs.get("tvg-id", ""),
         tvg_name=attrs.get("tvg-name", ""),
         tvg_logo=attrs.get("tvg-logo", ""),
-        group=attrs.get("group-title", "")
+        group=attrs.get("group-title", ""),
+	source=source
     )
 
 
-def load_playlist(filename: str):
+def load_playlist(filename: str, source: str):
 
     channels = []
 
@@ -47,12 +48,14 @@ def load_playlist(filename: str):
 
             if i + 1 < len(lines):
 
-                channels.append(
-                    parse_channel(
-                        line,
-                        lines[i + 1]
-                    )
-                )
+channel = parse_channel(
+    line,
+    lines[i + 1]
+)
+
+channel.source = source
+
+channels.append(channel)
 
                 i += 2
 

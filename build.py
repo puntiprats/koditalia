@@ -19,11 +19,14 @@ def main():
 
 channels = []
 
-for playlist in fetch():
+for source, playlist in fetch():
 
-    channels.extend(
-        load_playlist(playlist)
+    loaded = load_playlist(
+        playlist,
+        source["name"]
     )
+
+    channels.extend(loaded)
 
     for c in channels:
         c.name = canonical_name(c.name)
