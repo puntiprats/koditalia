@@ -5,6 +5,7 @@ from writer import save_playlist
 from matcher import canonical_name
 from lcn import channel_number
 from quality import score
+from validator import alive
 
 
 INPUT = None
@@ -28,7 +29,17 @@ for source, playlist in fetch():
 
     channels.extend(loaded)
 
-    for c in channels:
+valid_channels = []
+
+for c in channels:
+
+    if alive(c.url):
+
+        valid_channels.append(c)
+
+channels = valid_channels
+
+for c in channels:
         c.name = canonical_name(c.name)
 
     print(f"{len(channels)} canali caricati")
