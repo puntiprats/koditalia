@@ -11,11 +11,7 @@ def select_best(
 
     for channel in channels:
 
-        key = (
-            channel.tvg_id.lower().strip()
-            if channel.tvg_id
-            else channel.canonical_name.lower().strip()
-        )
+        key = channel.identity.lower().strip()
 
         groups[key].append(channel)
 

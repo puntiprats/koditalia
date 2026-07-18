@@ -14,7 +14,7 @@ def parse_extinf(line: str) -> tuple[dict[str, str], str]:
     attrs = dict(ATTR_RE.findall(line))
 
     if "," in line:
-        name = line.split(",", 1)[1].strip()
+        name = line.rsplit(",", 1)[1].strip()
     else:
         name = ""
 
