@@ -2,27 +2,23 @@ import re
 import unicodedata
 
 
-QUALITY_WORDS = [
-    "uhd",
-    "ultrahd",
-    "4k",
-    "2160",
-    "fhd",
-    "fullhd",
-    "1080",
+REMOVE_WORDS = {
     "hd",
-    "720",
-    "576",
+    "fhd",
+    "uhd",
+    "4k",
     "sd",
+    "1080",
+    "720",
+    "2160",
+    "backup",
+    "test",
     "hevc",
     "h265",
     "h264",
     "mpeg4",
-    "av1",
-    "backup",
-    "test",
-    "hq"
-]
+    "av1"
+}
 
 
 def normalize(text: str) -> str:
@@ -32,16 +28,17 @@ def normalize(text: str) -> str:
 
     text = text.lower()
 
-    for word in QUALITY_WORDS:
-        text = text.replace(word, " ")
-
-    text = text.replace("+", " ")
-
     text = re.sub(r"\([^)]*\)", " ", text)
     text = re.sub(r"\[[^\]]*\]", " ", text)
 
     text = re.sub(r"[^a-z0-9]+", " ", text)
 
-    text = " ".join(text.split())
+    words = []
 
-    return text
+    for word in text.split():
+
+        if word not in REMOVE_WORDS:
+
+            words.append(word)
+
+    return " ".join(words)
