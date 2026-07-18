@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "name": "iptv-org Italia",
+      "type": "m3u",
+      "url": "https://iptv-org.github.io/iptv/countries/it.m3u",
+      "enabled": true
+    }
+  ]
+}
