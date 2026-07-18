@@ -1,42 +1,70 @@
+import re
+from pathlib import Path
+
 from models import Channel
 
 
-def _renumber(channel: Channel, number: int) -> str:
+def set_channel_number(extinf: str, number: int) -> str:
 
-    extinf = channel.extinf
+    if 'tvg-chno="' in extinf:
 
-    if f'tvg-chno="' in extinf:
+        return re.sub(
+            r'tvg-chno="[^"]*"',
+            f'tvg-chno="{number}"',
+            extinf
+        )
 
-        import re
-        extinf = re.sub(r'tvg-chno="[^"]*"', f'tvg-chno="{number}"', extinf)
+    comma = extinf.find(",")
 
-    else:
+    if comma == -1:
+        return extinf
 
-        pos = extinf.find(",")
+    return (
+        extinf[:comma]
+        + f' tvg-chno="{number}"'
+        + extinf[comma:]
+    )
 
-        extinf = extinf[:pos] + f' tvg-chno="{number}"' + extinf[pos:]
 
-    return extinf
+def write_playlist(
+    channels: list[Channel],
+    duplicates: list[Channel],
+    filename: Path,
+):
 
-
-def save_playlist(channels: list[Channel], duplicates: list[Channel], filename: str):
+    filename.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
     with open(filename, "w", encoding="utf8") as f:
 
         f.write("#EXTM3U\n")
 
-        for c in channels:
+        for channel in channels:
 
-            f.write(c.extinf + "\n")
-            f.write(c.url + "\n")
+            extinf = channel.extinf
 
-        ch = 800
+            if channel.lcn is not None:
 
-        for c in duplicates:
-
-            extinf = _renumber(c, ch)
+                extinf = set_channel_number(
+                    extinf,
+                    channel.lcn
+                )
 
             f.write(extinf + "\n")
-            f.write(c.url + "\n")
+            f.write(channel.url + "\n")
 
-            ch += 1
+        duplicate_number = 800
+
+        for channel in duplicates:
+
+            extinf = set_channel_number(
+                channel.extinf,
+                duplicate_number
+            )
+
+            f.write(extinf + "\n")
+            f.write(channel.url + "\n")
+
+            duplicate_number += 1

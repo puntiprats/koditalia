@@ -3,7 +3,11 @@ from pipeline import normalize_channels
 from selector import select_best
 
 from sources import fetch
+from pathlib import Path
 
+from writer import write_playlist
+
+OUTPUT = Path("output") / "tvitalia.m3u"
 
 def build():
 
@@ -33,5 +37,11 @@ def build():
     print("Duplicates :", len(duplicates))
 
     print()
+
+    write_playlist(
+        selected,
+        duplicates,
+        OUTPUT
+    )
 
     return selected, duplicates
