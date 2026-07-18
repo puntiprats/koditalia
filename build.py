@@ -3,6 +3,7 @@ from pathlib import Path
 from parser import load_playlist
 from writer import save_playlist
 from matcher import canonical_name
+from lcn import channel_number
 
 
 INPUT = "it.m3u"
@@ -22,7 +23,27 @@ def main():
 
     print(f"{len(channels)} canali caricati")
 
-    save_playlist(channels, OUTPUT)
+known = []
+unknown = []
+
+for c in channels:
+
+    n = channel_number(c.name)
+
+    if n is None:
+        unknown.append(c)
+    else:
+        known.append((n, c))
+
+known.sort(key=lambda x: x[0])
+
+unknown.sort(key=lambda x: x.name)
+
+ordered = [c for _, c in known]
+
+ordered.extend(unknown)
+
+save_playlist(ordered, OUTPUT)
 
     print("Playlist salvata in", OUTPUT)
 
