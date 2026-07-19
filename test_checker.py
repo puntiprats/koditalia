@@ -1,7 +1,14 @@
 from checker import check_stream
 
-url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+TESTS = [
+    "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+    "https://example.com/notfound.m3u8",
+]
 
-result = check_stream(url)
+for url in TESTS:
 
-print(result)
+    result = check_stream(url)
+
+    print()
+    print(url)
+    print(result)

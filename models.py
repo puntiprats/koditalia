@@ -27,3 +27,7 @@ class Channel:
     quality_score: int = 0
 
     lcn: int | None = None
+
+    alive: bool | None = None
+    response_time: float | None = None
+    status_code: int | None = None
