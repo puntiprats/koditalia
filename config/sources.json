@@ -1,21 +1,20 @@
-{
-  "sources":[
-
+[
     {
-      "name":"iptv_org",
-      "priority":100,
-      "enabled":true,
-      "type":"m3u",
-      "url":"https://iptv-org.github.io/iptv/countries/it.m3u"
+        "name": "iptv-org",
+        "url": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/it.m3u",
+        "enabled": true,
+        "priority": 100
     },
-
     {
-      "name":"mia_playlist",
-      "priority":120,
-      "enabled":false,
-      "type":"m3u",
-      "url":"https://...."
+        "name": "free-tv",
+        "url": "",
+        "enabled": false,
+        "priority": 90
+    },
+    {
+        "name": "community",
+        "url": "",
+        "enabled": false,
+        "priority": 80
     }
-
-  ]
-}
+]

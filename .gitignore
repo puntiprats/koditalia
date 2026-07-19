@@ -4,3 +4,4 @@ output/*.m3u
 cache/
 cache/*.json
 analysis.txt
+z_PROMPTS.txt
