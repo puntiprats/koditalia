@@ -52,4 +52,17 @@ def select_best(
 
         duplicates.extend(group[1:])
 
+        for duplicate in group[1:]:
+
+            if (
+                duplicate.source == group[0].source
+                or not duplicate.alive
+            ):
+                continue
+
+            print(
+                f"{group[0].identity}: "
+                f"{group[0].source} > {duplicate.source}"
+            )
+
     return selected, duplicates
