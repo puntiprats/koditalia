@@ -3,14 +3,56 @@ from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
 from config import settings
 import requests
+import json
+from pathlib import Path
 
 _CACHE = {}
+
+
+CACHE_FILE = Path("cache/stream_health.json")
+
+
+def load_cache():
+
+    if CACHE_FILE.exists():
+
+        with CACHE_FILE.open(
+            "r",
+            encoding="utf8"
+        ) as f:
+
+            return json.load(f)
+
+    return {}
+
+
+def save_cache():
+
+    CACHE_FILE.parent.mkdir(
+        exist_ok=True
+    )
+
+    with CACHE_FILE.open(
+        "w",
+        encoding="utf8"
+    ) as f:
+
+        json.dump(
+            _CACHE,
+            f,
+            indent=4
+        )
+
+
+_CACHE = load_cache()
+
 
 @dataclass
 class StreamStatus:
     alive: bool
+    geo_blocked: bool
     response_time: float | None
-    status_code: int |None
+    status_code: int | None
     error: str | None
 
 
@@ -44,19 +86,21 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
             ""
         ).lower()
 
+        status = response.status_code
+
         alive = (
-            response.ok
-            and (
-                "mpegurl" in content_type
-                or "application/vnd.apple.mpegurl" in content_type
-                or url.endswith(".m3u8")
-            )
+            status == 200
+        )
+
+        geo_blocked = (
+            status == 403
         )
 
         result = StreamStatus(
             alive=alive,
+            geo_blocked=geo_blocked,
             response_time=perf_counter() - start,
-            status_code=response.status_code,
+            status_code=status,
             error=None,
         )
 
@@ -68,6 +112,7 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
 
         result = StreamStatus(
             alive=False,
+            geo_blocked=False,
             response_time=None,
             status_code=None,
             error=str(exc),
@@ -93,7 +138,10 @@ def check_streams(
         for channel, status in results:
 
             channel.alive = status.alive
+            channel.geo_blocked = status.geo_blocked
             channel.response_time = status.response_time
             channel.status_code = status.status_code
+
+    save_cache()
 
     return channels

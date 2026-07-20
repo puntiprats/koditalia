@@ -33,3 +33,4 @@ class Channel:
     status_code: int | None = None
 
     selected_reason: str = ""
+    geo_blocked: bool = False
