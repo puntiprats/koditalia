@@ -6,6 +6,7 @@ from pathlib import Path
 from writer import write_playlist
 from lcn import apply_lcn
 from stats import print_sources
+from stats import print_selected
 
 OUTPUT = Path("output") / "tvitalia.m3u"
 
@@ -27,6 +28,8 @@ def build():
     print_sources(channels)
 
     selected, duplicates = select_best(channels)
+
+    print_selected(selected)
 
     selected = apply_lcn(selected)
 
