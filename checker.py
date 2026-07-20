@@ -1,50 +1,12 @@
 from dataclasses import dataclass
 from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
-from config import settings
 import requests
-import json
-from pathlib import Path
+import re
+
+QUALITY_RE = re.compile(r"RESOLUTION=(\d+)x(\d+)")
 
 _CACHE = {}
-
-
-CACHE_FILE = Path("cache/stream_health.json")
-
-
-def load_cache():
-
-    if CACHE_FILE.exists():
-
-        with CACHE_FILE.open(
-            "r",
-            encoding="utf8"
-        ) as f:
-
-            return json.load(f)
-
-    return {}
-
-
-def save_cache():
-
-    CACHE_FILE.parent.mkdir(
-        exist_ok=True
-    )
-
-    with CACHE_FILE.open(
-        "w",
-        encoding="utf8"
-    ) as f:
-
-        json.dump(
-            _CACHE,
-            f,
-            indent=4
-        )
-
-
-_CACHE = load_cache()
 
 
 @dataclass
@@ -54,12 +16,13 @@ class StreamStatus:
     response_time: float | None
     status_code: int | None
     error: str | None
+    quality: int | None
 
 
 def check_stream(url: str, timeout=None) -> StreamStatus:
 
     if timeout is None:
-        timeout = settings["timeout"]
+        timeout = 5
 
     if url in _CACHE:
         return _CACHE[url]
@@ -80,6 +43,8 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
                 )
             },
         )
+
+        quality = detect_quality(response)
 
         content_type = response.headers.get(
             "Content-Type",
@@ -102,6 +67,7 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
             response_time=perf_counter() - start,
             status_code=status,
             error=None,
+            quality=quality,
         )
 
         _CACHE[url] = result
@@ -116,6 +82,7 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
             response_time=None,
             status_code=None,
             error=str(exc),
+            quality=None,
         )
 
         _CACHE[url] = result
@@ -141,7 +108,38 @@ def check_streams(
             channel.geo_blocked = status.geo_blocked
             channel.response_time = status.response_time
             channel.status_code = status.status_code
-
-    save_cache()
+            channel.quality_score = status.quality or channel.quality_score
 
     return channels
+
+
+def detect_quality(response) -> int | None:
+
+    try:
+
+        text = response.text[:10000]
+
+    except Exception:
+
+        return None
+
+    match = QUALITY_RE.search(text)
+
+    if not match:
+        return None
+
+    height = int(match.group(2))
+
+    if height >= 1080:
+        return 100
+
+    if height >= 720:
+        return 80
+
+    if height >= 576:
+        return 60
+
+    if height >= 480:
+        return 40
+
+    return 20
