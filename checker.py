@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from time import perf_counter
+from concurrent.futures import ThreadPoolExecutor
+from config import settings
 import requests
 
 _CACHE = {}
@@ -12,7 +14,10 @@ class StreamStatus:
     error: str | None
 
 
-def check_stream(url: str, timeout: int = 5) -> StreamStatus:
+def check_stream(url: str, timeout=None) -> StreamStatus:
+
+    if timeout is None:
+        timeout = settings["timeout"]
 
     if url in _CACHE:
         return _CACHE[url]
@@ -34,8 +39,22 @@ def check_stream(url: str, timeout: int = 5) -> StreamStatus:
             },
         )
 
+        content_type = response.headers.get(
+            "Content-Type",
+            ""
+        ).lower()
+
+        alive = (
+            response.ok
+            and (
+                "mpegurl" in content_type
+                or "application/vnd.apple.mpegurl" in content_type
+                or url.endswith(".m3u8")
+            )
+        )
+
         result = StreamStatus(
-            alive=response.ok,
+            alive=alive,
             response_time=perf_counter() - start,
             status_code=response.status_code,
             error=None,
@@ -57,3 +76,24 @@ def check_stream(url: str, timeout: int = 5) -> StreamStatus:
         _CACHE[url] = result
 
         return result
+
+
+def check_streams(
+    channels,
+    workers: int = 10,
+):
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+
+        results = executor.map(
+            lambda c: (c, check_stream(c.url)),
+            channels,
+        )
+
+        for channel, status in results:
+
+            channel.alive = status.alive
+            channel.response_time = status.response_time
+            channel.status_code = status.status_code
+
+    return channels

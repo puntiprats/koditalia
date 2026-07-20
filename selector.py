@@ -1,6 +1,5 @@
 from collections import defaultdict
 from models import Channel
-from checker import check_stream
 
 
 def select_best(
@@ -22,19 +21,17 @@ def select_best(
 
         from ranking import ranking
 
-        if len(group) > 1:
+        if len(group) > 1 and len({c.url for c in group}) > 1:
+
+            from checker import check_streams
 
             alive = []
 
+            check_streams(group)
+
             for channel in group:
 
-                status = check_stream(channel.url)
-
-                channel.alive = status.alive
-                channel.response_time = status.response_time
-                channel.status_code = status.status_code
-
-                if status.alive:
+                if channel.alive:
                     alive.append(channel)
 
             if alive:
@@ -43,6 +40,12 @@ def select_best(
         group.sort(
             key=ranking,
             reverse=True
+        )
+
+        group[0].selected_reason = (
+            f"{group[0].source} "
+            f"(quality={group[0].quality_score}, "
+            f"response={group[0].response_time})"
         )
 
         selected.append(group[0])

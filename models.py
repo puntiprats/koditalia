@@ -31,3 +31,5 @@ class Channel:
     alive: bool | None = None
     response_time: float | None = None
     status_code: int | None = None
+
+    selected_reason: str = ""

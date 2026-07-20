@@ -1,20 +1,25 @@
-[
-    {
-        "name": "iptv-org",
-        "url": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/it.m3u",
-        "enabled": true,
-        "priority": 100
-    },
-    {
-        "name": "free-tv",
-        "url": "",
-        "enabled": false,
-        "priority": 90
-    },
-    {
-        "name": "community",
-        "url": "",
-        "enabled": false,
-        "priority": 80
-    }
-]
+{
+    "sources": [
+        {
+            "name": "iptv-org",
+            "url": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/it.m3u",
+            "enabled": true,
+            "priority": 100,
+            "country": "IT"
+        },
+        {
+            "name": "free-tv",
+            "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_italy.m3u8",
+            "enabled": true,
+            "priority": 90,
+            "country": "IT"
+        },
+        {
+            "name": "community",
+            "url": "",
+            "enabled": false,
+            "priority": 80,
+            "country": "IT"
+        }
+    ]
+}
