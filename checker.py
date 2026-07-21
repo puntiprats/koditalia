@@ -19,6 +19,27 @@ class StreamStatus:
     quality: int | None
 
 
+def verify_hls(response, url: str) -> bool:
+
+    try:
+
+        content = response.text[:10000]
+
+        if "#EXTM3U" not in content:
+            return False
+
+        if "#EXT-X-STREAM-INF" in content:
+            return True
+
+        if "#EXTINF:" in content:
+            return True
+
+        return False
+
+    except Exception:
+        return False
+
+
 def check_stream(url: str, timeout=None) -> StreamStatus:
 
     if timeout is None:
@@ -60,6 +81,18 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
         geo_blocked = (
             status == 403
         )
+
+        # Per gli stream HLS, verifica che la risposta
+        # contenga effettivamente un manifest M3U8 valido.
+        if alive and (
+            ".m3u8" in url.lower()
+            or "mpegurl" in content_type
+        ):
+
+            alive = verify_hls(
+                response,
+                url
+            )
 
         result = StreamStatus(
             alive=alive,
@@ -108,7 +141,17 @@ def check_streams(
             channel.geo_blocked = status.geo_blocked
             channel.response_time = status.response_time
             channel.status_code = status.status_code
-            channel.quality_score = status.quality or channel.quality_score
+            
+        if status.quality is not None:
+
+            channel.quality_score = max(
+                channel.quality_score,
+                status.quality
+            )
+
+        if "forceuseragent=" in channel.url.lower():
+
+            channel.quality_score += 50
 
     return channels
 

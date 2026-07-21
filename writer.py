@@ -4,15 +4,43 @@ from pathlib import Path
 from models import Channel
 
 
-def set_channel_number(extinf: str, number: int) -> str:
+def remove_channel_number(extinf: str) -> str:
 
-    if 'tvg-chno="' in extinf:
+    return re.sub(
+        r'\s*tvg-chno="[^"]*"',
+        "",
+        extinf
+    )
 
-        return re.sub(
-            r'tvg-chno="[^"]*"',
-            f'tvg-chno="{number}"',
-            extinf
-        )
+
+def clean_display_name(extinf: str) -> str:
+
+    # Rimuove il simbolo Free-TV Ⓖ dal nome visualizzato
+    extinf = re.sub(
+        r'\s*Ⓖ',
+        '',
+        extinf
+    )
+
+    # Rimuove eventuali varianti "(G)"
+    extinf = re.sub(
+        r'\s*\(G\)',
+        '',
+        extinf,
+        flags=re.IGNORECASE
+    )
+
+    return extinf
+
+
+def set_channel_number(
+    extinf: str,
+    number: int
+) -> str:
+
+    extinf = remove_channel_number(
+        extinf
+    )
 
     comma = extinf.find(",")
 
@@ -37,13 +65,19 @@ def write_playlist(
         exist_ok=True
     )
 
-    with open(filename, "w", encoding="utf8") as f:
+    with open(
+        filename,
+        "w",
+        encoding="utf8"
+    ) as f:
 
         f.write("#EXTM3U\n")
 
         for channel in channels:
 
-            extinf = channel.extinf
+            extinf = clean_display_name(
+                channel.extinf
+            )
 
             if channel.lcn is not None:
 
@@ -52,19 +86,39 @@ def write_playlist(
                     channel.lcn
                 )
 
-            f.write(extinf + "\n")
-            f.write(channel.url + "\n")
+            else:
+
+                extinf = remove_channel_number(
+                    extinf
+                )
+
+            f.write(
+                extinf + "\n"
+            )
+
+            f.write(
+                channel.url + "\n"
+            )
 
         duplicate_number = 800
 
         for channel in duplicates:
 
-            extinf = set_channel_number(
-                channel.extinf,
-                duplicate_number
+            extinf = clean_display_name(
+                channel.extinf
             )
 
-            f.write(extinf + "\n")
-            f.write(channel.url + "\n")
+            extinf = set_channel_number(
+                extinf,
+                duplicate_number
+            )
+            
+            f.write(
+                extinf + "\n"
+            )
+
+            f.write(
+                channel.url + "\n"
+            )
 
             duplicate_number += 1

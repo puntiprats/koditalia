@@ -3,55 +3,196 @@ import re
 from matcher import canonical_name
 
 
-def build_identity(name: str, tvg_id: str = "", tvg_name: str = "") -> str:
+# Suffissi che non devono influire sull'identità del canale.
+QUALITY_SUFFIX_RE = re.compile(
+    r"""
+    \s*
+    (?:
+        \(\s*(?:576p|720p|1080p|2160p|4k|uhd|hd|fhd|sd)\s*\)
+        |
+        \[\s*(?:geo-blocked|geo blocked)\s*\]
+        |
+        \b(?:576p|720p|1080p|2160p|4k|uhd|fhd|hd|sd)\b
+    )
+    \s*$
+    """,
+    flags=re.IGNORECASE | re.VERBOSE,
+)
+
+
+def clean_candidate(value: str) -> str:
+
+    value = value.strip()
+
+    # Rimuove simboli Free-TV come Ⓖ
+    value = value.replace("Ⓖ", "")
+
+    # Rimuove suffissi geo-blocking
+    value = re.sub(
+        r"\s*\[\s*geo[- ]?blocked\s*\]",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
+
+    # Rimuove eventuali suffissi di qualità ripetuti.
+    # Esempi:
+    # Rai 1 (576p)
+    # Rai 2 HD
+    # Rai 3 (1080p)
+    # DMAX HD
+    for _ in range(3):
+
+        cleaned = QUALITY_SUFFIX_RE.sub(
+            "",
+            value,
+        ).strip()
+
+        if cleaned == value:
+            break
+
+        value = cleaned
+
+    # Rimuove suffisso @SD / @HD / @FHD / @UHD / @4K
+    value = re.sub(
+        r"@(?:sd|hd|fhd|uhd|4k)$",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
+
+    # Rimuove suffisso .it
+    value = re.sub(
+        r"\.it$",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
+
+    # Inserisce uno spazio tra lettere e numeri.
+    # Esempio:
+    # Rai1 -> Rai 1
+    # DMAX24 -> DMAX 24
+    value = re.sub(
+        r"([A-Za-z])([0-9])",
+        r"\1 \2",
+        value,
+    )
+
+    # Normalizzazione degli spazi
+    value = re.sub(
+        r"\s+",
+        " ",
+        value,
+    ).strip()
+
+    return value
+
+
+def build_identity(
+    name: str,
+    tvg_id: str = "",
+    tvg_name: str = "",
+) -> str:
+
     """
     Restituisce l'identità canonica del canale.
 
-    L'ordine di priorità è:
-    1. Nome del canale
+    Priorità:
+    1. nome visualizzato
     2. tvg-name
     3. tvg-id
     """
 
-    candidate = name
-
-    if not candidate and tvg_name:
-        candidate = tvg_name
-
-    if not candidate and tvg_id:
-        candidate = tvg_id
-
-    candidate = candidate.strip()
-
-    # rimuove eventuale suffisso qualità
-    candidate = re.sub(
-        r'@(?:sd|hd|fhd|uhd|4k)$',
-        '',
-        candidate,
-        flags=re.IGNORECASE
+    candidates = (
+        name,
+        tvg_name,
+        tvg_id,
     )
 
-    # rimuove suffisso .it
-    candidate = re.sub(
-        r'\.it$',
-        '',
-        candidate,
-        flags=re.IGNORECASE
+    candidate = ""
+
+    for value in candidates:
+
+        if value and value.strip():
+
+            candidate = value.strip()
+
+            break
+
+    if not candidate:
+
+        return ""
+
+    candidate = clean_candidate(
+        candidate
     )
-    
-    # Inserisce uno spazio tra lettere e numeri
-    candidate = re.sub(r'([A-Za-z])([0-9])', r'\1 \2', candidate)
 
-    candidate = candidate.strip()
+    # Eccezioni e nomi canonici italiani.
+    aliases = {
 
-    # Eccezioni italiane
-    candidate = re.sub(r'^La\s+7$', 'LA7', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Tv\s+8$', 'TV8', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Rai\s+1$', 'Rai 1', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Rai\s+2$', 'Rai 2', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Rai\s+3$', 'Rai 3', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Rete\s+4$', 'Rete 4', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Canale\s+5$', 'Canale 5', candidate, flags=re.IGNORECASE)
-    candidate = re.sub(r'^Italia\s+1$', 'Italia 1', candidate, flags=re.IGNORECASE)
+        "la 7": "LA7",
+        "la7": "LA7",
 
-    return canonical_name(candidate)
+        "tv 8": "TV8",
+        "tv8": "TV8",
+
+        "nove": "Nove",
+
+        "dmax": "DMAX",
+
+        "rai 1": "Rai 1",
+        "rai 2": "Rai 2",
+        "rai 3": "Rai 3",
+
+        "rete 4": "Rete 4",
+        "canale 5": "Canale 5",
+        "italia 1": "Italia 1",
+
+        "la7d": "La7d",
+
+        "rai movie": "Rai Movie",
+        "rai premium": "Rai Premium",
+
+        "cielo": "Cielo",
+
+        "twentyseven": "Twentyseven",
+
+        "tv2000": "TV2000",
+
+        "real time": "Real Time",
+
+        "food network": "Food Network",
+
+        "warner tv": "Warner TV",
+
+        "giallo": "Giallo",
+
+        "top crime": "Top Crime",
+
+        "boing": "Boing",
+
+        "k2": "K2",
+
+        "rai gulp": "Rai Gulp",
+        "rai yoyo": "Rai YoYo",
+
+        "frisbee": "Frisbee",
+
+        "cartoonito": "Cartoonito",
+
+        "super!": "Super!",
+
+        "dmax": "DMAX",
+    }
+
+    key = candidate.lower()
+
+    candidate = aliases.get(
+        key,
+        candidate,
+    )
+
+    return canonical_name(
+        candidate
+    )

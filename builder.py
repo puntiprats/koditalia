@@ -29,9 +29,47 @@ def build():
 
     selected, duplicates = select_best(channels)
 
+    print()
+
+    print("===== CHECK NATIONAL =====")
+
+    for channel in selected + duplicates:
+
+        if channel.identity.lower() in (
+            "la7",
+            "nove",
+            "la7d",
+        ):
+
+            print(
+                channel.name,
+                "|",
+                channel.identity,
+                "|",
+                channel.url,
+                "| selected:",
+                channel in selected,
+                "| lcn:",
+                channel.lcn,
+            )
+
     print_selected(selected)
 
     selected = apply_lcn(selected)
+
+    print()
+
+    print("===== FIRST 30 =====")
+
+    for channel in selected[:30]:
+
+        print(
+            channel.lcn,
+            "|",
+            channel.name,
+            "|",
+            channel.identity
+        )
 
     print()
 

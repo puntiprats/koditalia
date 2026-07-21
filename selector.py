@@ -29,6 +29,32 @@ def select_best(
 
             check_streams(group)
 
+
+
+
+            for channel in group:
+
+                if channel.identity in (
+                    "Rai 1",
+                    "Rai 3",
+                ):
+                    print(
+                        channel.identity,
+                        "|",
+                        channel.url,
+                        "| alive:",
+                        channel.alive,
+                        "| quality:",
+                        channel.quality_score,
+                        "| response:",
+                        channel.response_time,
+                        "| status:",
+                        channel.status_code,
+                    )
+
+
+
+
             for channel in group:
 
                 if channel.alive:
