@@ -18,21 +18,6 @@ def normalize_channels(
             channel.tvg_name
         )
 
-        if channel.identity in (
-            "Canale 5",
-            "Italia 1",
-            "Rete 4",
-        ):
-            print(
-                "DEBUG FINAL:",
-                channel.name,
-                "| identity:",
-                channel.identity,
-                "| tvg-id:",
-                channel.tvg_id,
-                "| source:",
-                channel.source
-            )
 
         channel.name = channel.identity
 

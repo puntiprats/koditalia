@@ -30,12 +30,8 @@ def calculate_quality(channel: Channel) -> int:
     score = 0
 
     for pattern, value in RULES:
-
         if re.search(pattern, text):
-            score = max(
-                score,
-                value
-            )
+            score = max(score, value)
 
     return score
 
@@ -45,7 +41,4 @@ def apply_quality(
 ) -> None:
 
     for channel in channels:
-
-        channel.quality_score = calculate_quality(
-            channel
-        )
+        channel.quality_score = calculate_quality(channel)

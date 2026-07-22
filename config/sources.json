@@ -10,8 +10,22 @@
         {
             "name": "free-tv",
             "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_italy.m3u8",
-            "enabled": true,
+            "enabled": false,
             "priority": 90,
+            "country": "IT"
+        },
+        {
+            "name": "in-the-mix",
+            "url": "http://inthemix.altervista.org/tv.m3u",
+            "enabled": true,
+            "priority": 80,
+            "country": "IT"
+        },
+        {
+            "name": "leica-florian-robert",
+            "url": "https://tvit.leicaflorianrobert.dev/iptv/list.m3u",
+            "enabled": false,
+            "priority": 80,
             "country": "IT"
         },
         {

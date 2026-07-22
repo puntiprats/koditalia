@@ -34,11 +34,12 @@ def build():
     selected = apply_lcn(selected)
 
     print()
-    print("==========")
-    print("Loaded :", len(channels))
-    print("Selected :", len(selected))
+    print("========== BUILD SUMMARY ==========")
+    print("Loaded     :", len(channels))
+    print("Selected   :", len(selected))
     print("Duplicates :", len(duplicates))
-    print()
+    print("Output     :", OUTPUT)
+    print("===================================")
 
     write_playlist(
         selected,
