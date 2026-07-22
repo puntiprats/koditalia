@@ -10,15 +10,15 @@
         {
             "name": "free-tv",
             "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_italy.m3u8",
-            "enabled": false,
-            "priority": 90,
+            "enabled": true,
+            "priority": 100,
             "country": "IT"
         },
         {
             "name": "in-the-mix",
             "url": "http://inthemix.altervista.org/tv.m3u",
-            "enabled": true,
-            "priority": 80,
+            "enabled": false,
+            "priority": 90,
             "country": "IT"
         },
         {
