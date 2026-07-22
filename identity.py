@@ -69,6 +69,20 @@ def clean_candidate(value: str) -> str:
         flags=re.IGNORECASE,
     )
 
+
+    # Normalizza punti usati nei tvg-id
+    # Esempio:
+    # Canale.5 -> Canale 5
+    # Italia.1 -> Italia 1
+    # Rete.4 -> Rete 4
+
+    value = re.sub(
+        r"\.",
+        " ",
+        value,
+    )
+
+
     # Inserisce uno spazio tra lettere e numeri.
     # Esempio:
     # Rai1 -> Rai 1

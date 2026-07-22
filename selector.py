@@ -29,6 +29,27 @@ def select_best(
 
             check_streams(group)
 
+            print(
+                f"\n===== GROUP {group[0].identity} ====="
+            )
+
+            for channel in group:
+
+                print(
+                    channel.name,
+                    "| source:",
+                    channel.source,
+                    "| url:",
+                    channel.url,
+                    "| alive:",
+                    channel.alive,
+                    "| geo:",
+                    channel.geo_blocked,
+                    "| status:",
+                    channel.status_code,
+                    "| quality:",
+                    channel.quality_score,
+                )
 
 
 
@@ -53,15 +74,34 @@ def select_best(
                     )
 
 
-
-
             for channel in group:
 
-                if channel.alive:
+                if channel.alive and not channel.geo_blocked:
                     alive.append(channel)
 
             if alive:
                 group = alive
+
+
+            print("\nRANK DEBUG:", group[0].identity)
+
+            for c in group:
+                print(
+                    c.source,
+                    "|",
+                    c.url,
+                    "| alive:",
+                    c.alive,
+                    "| geo:",
+                    c.geo_blocked,
+                    "| quality:",
+                    c.quality_score,
+                    "| priority:",
+                    c.source_priority,
+                    "| rank:",
+                    ranking(c)
+                )
+
 
         group.sort(
             key=ranking,

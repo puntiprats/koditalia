@@ -37,13 +37,6 @@ def calculate_quality(channel: Channel) -> int:
                 value
             )
 
-    # Alcuni stream utilizzano parametri URL
-    # necessari per ottenere una variante
-    # specifica del flusso.
-    if "forceuseragent=" in channel.url.lower():
-
-        score += 50
-
     return score
 
 
@@ -55,11 +48,4 @@ def apply_quality(
 
         channel.quality_score = calculate_quality(
             channel
-        )
-
-        print(
-            "QUALITY DEBUG:",
-            channel.url,
-            "=>",
-            channel.quality_score
         )

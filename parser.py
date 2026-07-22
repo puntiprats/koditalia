@@ -44,7 +44,23 @@ def load_playlist(filename: str, source: str) -> list[Channel]:
         if i + 1 >= len(lines):
             break
 
-        url = lines[i + 1].strip()
+        user_agent = ""
+
+        j = i + 1
+
+        while j < len(lines) and lines[j].startswith("#"):
+
+            if lines[j].startswith("#EXTVLCOPT:http-user-agent="):
+                user_agent = lines[j].split("=", 1)[1]
+
+            j += 1
+
+
+        if j >= len(lines):
+            break
+
+
+        url = lines[j].strip()
 
         attrs, name = parse_extinf(line)
 
@@ -57,10 +73,11 @@ def load_playlist(filename: str, source: str) -> list[Channel]:
                 tvg_name=attrs.get("tvg-name", ""),
                 tvg_logo=attrs.get("tvg-logo", ""),
                 group_title=attrs.get("group-title", ""),
-                source=source
+                source=source,
+                user_agent=user_agent
             )
         )
 
-        i += 2
+        i = j + 1
 
     return channels

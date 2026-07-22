@@ -1,27 +1,43 @@
 from dataclasses import dataclass
 from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
-from urllib.parse import urljoin
 
 import requests
 import re
 
-QUALITY_RE = re.compile(r"RESOLUTION=(\d+)x(\d+)")
+
+QUALITY_RE = re.compile(
+    r"RESOLUTION=(\d+)x(\d+)"
+)
+
 
 _CACHE = {}
 
 
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 "
+    "KodiItalia/1.0"
+)
+
+
 @dataclass
 class StreamStatus:
+
     alive: bool
     geo_blocked: bool
+
     response_time: float | None
     status_code: int | None
+
     error: str | None
+
     quality: int | None
 
 
-def verify_hls(response, url: str) -> bool:
+def verify_hls(
+    response,
+    url: str
+) -> bool:
 
     try:
 
@@ -43,32 +59,45 @@ def verify_hls(response, url: str) -> bool:
         return False
 
 
-def check_stream(url: str, timeout=None) -> StreamStatus:
+def check_stream(
+    url: str,
+    user_agent: str = "",
+    timeout=None
+) -> StreamStatus:
 
     if timeout is None:
         timeout = 5
 
-    if url in _CACHE:
-        return _CACHE[url]
+    cache_key = (
+        url,
+        user_agent
+    )
+
+    if cache_key in _CACHE:
+        return _CACHE[cache_key]
 
     start = perf_counter()
 
     try:
+
+        headers = {
+            "User-Agent": (
+                user_agent
+                or DEFAULT_USER_AGENT
+            )
+        }
 
         response = requests.get(
             url,
             stream=True,
             timeout=timeout,
             allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "KodiItalia/1.0"
-                )
-            },
+            headers=headers,
         )
 
-        quality = detect_quality(response)
+        quality = detect_quality(
+            response
+        )
 
         content_type = response.headers.get(
             "Content-Type",
@@ -85,8 +114,6 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
             status == 403
         )
 
-        # Per gli stream HLS, verifica che la risposta
-        # contenga effettivamente un manifest M3U8 valido.
         if alive and (
             ".m3u8" in url.lower()
             or "mpegurl" in content_type
@@ -98,30 +125,45 @@ def check_stream(url: str, timeout=None) -> StreamStatus:
             )
 
         result = StreamStatus(
+
             alive=alive,
+
             geo_blocked=geo_blocked,
-            response_time=perf_counter() - start,
+
+            response_time=(
+                perf_counter()
+                - start
+            ),
+
             status_code=status,
+
             error=None,
+
             quality=quality,
         )
 
-        _CACHE[url] = result
+        _CACHE[cache_key] = result
 
         return result
 
     except Exception as exc:
 
         result = StreamStatus(
+
             alive=False,
+
             geo_blocked=False,
+
             response_time=None,
+
             status_code=None,
+
             error=str(exc),
+
             quality=None,
         )
 
-        _CACHE[url] = result
+        _CACHE[cache_key] = result
 
         return result
 
@@ -144,22 +186,13 @@ def check_streams(
             channel.geo_blocked = status.geo_blocked
             channel.response_time = status.response_time
             channel.status_code = status.status_code
-            
-        if status.quality is not None:
-
-            channel.quality_score = max(
-                channel.quality_score,
-                status.quality
-            )
-
-        if "forceuseragent=" in channel.url.lower():
-
-            channel.quality_score += 50
 
     return channels
 
 
-def detect_quality(response) -> int | None:
+def detect_quality(
+    response
+) -> int | None:
 
     try:
 
@@ -169,12 +202,16 @@ def detect_quality(response) -> int | None:
 
         return None
 
-    match = QUALITY_RE.search(text)
+    match = QUALITY_RE.search(
+        text
+    )
 
     if not match:
         return None
 
-    height = int(match.group(2))
+    height = int(
+        match.group(2)
+    )
 
     if height >= 1080:
         return 100

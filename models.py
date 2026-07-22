@@ -13,6 +13,8 @@ class Channel:
     url: str
     extinf: str
 
+    user_agent: str = ""
+    
     # Metadata IPTV
     tvg_id: str = ""
     tvg_name: str = ""
